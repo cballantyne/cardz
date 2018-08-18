@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Trading Cards front-end</title>
+    <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!--<script language="javascript" type="text/javascript" src="web3.min.js"></script>-->
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+    <script language="javascript" type="text/javascript" src="tradingcards.abi.js"></script>
+</head>
+<body>
+<script>
+    var tradingCards;
+    var userAccount;
+
+    function startApp() {
+        console.log("starting app...");
+        var tradingCardsAddress = '0x5ed18998322b2a3ed37dae24d7f3aadea71f1d3c';
+        console.log(tradingcardsAbi);
+        var tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
+        tradingCards = tradingCardsContract.at(tradingCardsAddress);
+
+
+        console.log(tradingCards);
+
+        // var result = tradingCards.cards(1);
+        // console.log(result); // '0x25434534534'
+        // tradingCards.cards(3, function(error, result){
+        //     if(!error)
+        //         console.log(JSON.stringify(result));
+        //     else
+        //         console.error(error);
+        // });
+        var accountInterval = setInterval(function() {
+            // Check if account has changed
+            if (web3.eth.accounts[0] !== userAccount) {
+                userAccount = web3.eth.accounts[0];
+                // Call a function to update the UI with the new account
+                console.log("have account now do stuff");
+
+
+
+
+                getCardsByOwner(userAccount).then(function(result) {
+                    displayCards(result);
+                });
+                //
+                // return tradingCards.getCardsByOwner(userAccount, function(error, result){
+                //     if(!error) {
+                //         console.log(JSON.stringify(result));
+                //         displayCards(result);
+                //     } else {
+                //         console.error(error);
+                //     }
+                //
+                // });
+
+                //displayCards(ownerCards);
+            }
+        }, 10);
+        // create filter
+        var filter = tradingCards.NewCard({}, function (error, result) {
+            if (!error)
+                console.log("aaa");
+                console.log(result);
+            /*
+            {
+                address: '0x8718986382264244252fc4abd0339eb8d5708727',
+                topics: "0x12345678901234567890123456789012", "0x0000000000000000000000000000000000000000000000000000000000000005",
+                data: "0x0000000000000000000000000000000000000000000000000000000000000001",
+                ...
+            }
+            */
+        });
+
+        // tradingCards.events.NewCard()
+        //     .on("data", function(event) {
+        //         let data = event.returnValues;
+        //         console.log("new card created");
+        //         // The current user just received a zombie!
+        //         // Do something here to update the UI to show it
+        //     }).on("error", console.error);
+    }
+
+    function getCardsByOwner(owner) {
+        console.log("get cards by owner1234");
+
+
+        return new Promise(function(resolve, reject){
+            tradingCards.getCardsByOwner(owner, function(error, result){
+                if(error){
+                    reject(error);
+                }
+                else{
+                    resolve(result);
+                }
+            })
+        });
+
+
+        //return tradingCards.getCardsByOwner(owner).then(function(result) {return result;});
+
+
+        // tradingCards.getCardsByOwner(owner, function(error, result){
+        //     if(!error) {
+        //         console.log(JSON.stringify(result));
+        //         return result;
+        //     } else {
+        //         console.error(error);
+        //     }
+        //
+        // });
+
+        //return tradingCards.getCardsByOwner(owner).call();
+    }
+
+    function getCardDetails(id) {
+        //return tradingCards.cards(id).call();
+
+        console.log('getting card details....');
+
+        return new Promise(function(resolve, reject){
+            tradingCards.cards(id, function(error, result){
+                if(error){
+                    reject(error);
+                }
+                else{
+                    resolve(result);
+                }
+            })
+        });
+
+
+        // return tradingCards.cards(id, function(error, result){
+        //     if(!error) {
+        //         console.log(JSON.stringify(result));
+        //         console.log('got card details!!!');
+        //     } else {
+        //         console.error(error);
+        //     }
+        //
+        // });
+    }
+
+    function displayCards(ids) {
+        $("#cards").empty();
+        for (id of ids) {
+            console.log('id looping');
+            console.log(id);
+            // Look up card details from our contract. Returns a `Card` object
+
+            // getCardDetails(id, function(error, result) {
+            //     if(!error) {
+            //         console.log(JSON.stringify(result));
+            //         console.log('got some cards!!!');
+            //         // Using ES6's "template literals" to inject variables into the HTML.
+            //         // Append each one to our #card div
+            //         $("#cards").append(`<div class="card">
+            //   <ul>
+            //     <li>Name: ${result.name}</li>
+            //   </ul>
+            // </div>`);
+            //     } else {
+            //         console.error(error);
+            //     }
+            // });
+
+
+
+            getCardDetails(id)
+                .then(function(card) {
+                    console.log('aa');
+                    console.log(card);
+                    // Using ES6's "template literals" to inject variables into the HTML.
+                    // Append each one to our #card div
+                    $("#cards").append(`<div class="card">
+              <ul>
+                <li>Name: ${card[0]}</li>
+              </ul>
+            </div>`);
+                });
+        }
+    }
+
+
+
+    window.addEventListener('load', function() {
+
+        console.log("load event.....");
+        //web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+
+        // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+        if (typeof web3 !== 'undefined') {
+            console.log("web3 defined");
+            // Use Mist/MetaMask's provider
+            web3js = new Web3(web3.currentProvider);
+        } else {
+            // Handle the case where the user doesn't have Metamask installed
+            // Probably show them a message prompting them to install Metamask
+        }
+
+        // Now you can start your app & access web3 freely:
+        startApp()
+
+    })
+</script>
+
+
+Trading Cards project
+
+
+<form >
+    Name: <input type="text" name="card_name">
+</form>
+
+
+<div id="cards">
+
+
+</div>
+
+</body>
+</html>
