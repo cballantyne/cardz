@@ -6,7 +6,8 @@ contract CardSet is Ownable {
 
     string public name;
 
-    event NewCard(uint cardId, string name, uint cardNum, uint instanceNum);
+    event CardsMinted(uint cardId, string name, uint cardNum, uint instanceNum);
+    event CardBought(uint cardId, address owner);
 
     uint dnaDigits = 16;
     uint dnaModulus = 10 ** dnaDigits;
@@ -23,11 +24,10 @@ contract CardSet is Ownable {
     mapping (uint => address) public cardToOwner;
     mapping (address => uint) ownerCardCount;
 
+
     function _createCard(string _name, uint16 _cardNum, uint16 _instanceNum) internal {
         uint id = cards.push(Card(_name, _cardNum, _instanceNum)) - 1;
-        cardToOwner[id] = msg.sender;
-        ownerCardCount[msg.sender]++;
-        NewCard(id, _name, _cardNum, _instanceNum);
+        CardsMinted(id, _name, _cardNum, _instanceNum);
     }
 
     function _generateRandomDna(string _str) private view returns (uint) {
@@ -35,12 +35,39 @@ contract CardSet is Ownable {
         return rand % dnaModulus;
     }
 
-    function mintCards(string _name) public {
+    function getUnownedCardsCount() public view returns (uint) {
+        uint count = 0;
+        for (uint i = 0; i < cards.length; i++) {
+            if (cardToOwner[i] == 0) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    function mintCards(string _name, uint16 _instanceCount) public {
         // require(ownerZombieCount[msg.sender] == 0);
         uint randDna = _generateRandomDna(_name);
-        _createCard(_name, 1, 1);
+
         // randDna = randDna - randDna % 100;
         // _createZombie(_name, randDna);
+        uint16 cardNum = 1;
+        if (cards.length > 0) {
+            cardNum = uint16(cards[cards.length-1].cardNum+1);
+        }
+
+        for (uint16 i = 1; i <= _instanceCount; i++) {
+            _createCard(_name, cardNum, i);
+        }
+    }
+
+    function buyCard(uint _cardId) public {
+        //security so can only buy unowned cards.
+        require(cardToOwner[_cardId] == 0);
+
+        cardToOwner[_cardId] = msg.sender;
+        ownerCardCount[msg.sender]++;
+        CardBought(_cardId, msg.sender);
     }
 
     function getCardsByOwner(address _owner) external view returns(uint[]) {
@@ -54,7 +81,6 @@ contract CardSet is Ownable {
         }
         return result;
     }
-
 
     function CardSet(address _owner, string _name)
     public
