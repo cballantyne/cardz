@@ -1,13 +1,47 @@
 var tradingcardsAbi = [
     {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "name": "cardId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "CardBought",
+        "type": "event"
+    },
+    {
         "constant": false,
         "inputs": [
             {
-                "name": "_name",
-                "type": "string"
+                "name": "_cardId",
+                "type": "uint256"
             }
         ],
-        "name": "mintCards",
+        "name": "buyCard",
         "outputs": [],
         "payable": false,
         "stateMutability": "nonpayable",
@@ -37,25 +71,26 @@ var tradingcardsAbi = [
                 "type": "uint256"
             }
         ],
-        "name": "NewCard",
+        "name": "CardsMinted",
         "type": "event"
     },
     {
-        "anonymous": false,
+        "constant": false,
         "inputs": [
             {
-                "indexed": true,
-                "name": "previousOwner",
-                "type": "address"
+                "name": "_name",
+                "type": "string"
             },
             {
-                "indexed": true,
-                "name": "newOwner",
-                "type": "address"
+                "name": "_instanceCount",
+                "type": "uint16"
             }
         ],
-        "name": "OwnershipTransferred",
-        "type": "event"
+        "name": "mintCards",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
     },
     {
         "constant": false,
@@ -70,6 +105,21 @@ var tradingcardsAbi = [
         "payable": false,
         "stateMutability": "nonpayable",
         "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "_owner",
+                "type": "address"
+            },
+            {
+                "name": "_name",
+                "type": "string"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "constructor"
     },
     {
         "constant": true,
@@ -130,6 +180,34 @@ var tradingcardsAbi = [
             {
                 "name": "",
                 "type": "uint256[]"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "getUnownedCardsCount",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "name",
+        "outputs": [
+            {
+                "name": "",
+                "type": "string"
             }
         ],
         "payable": false,

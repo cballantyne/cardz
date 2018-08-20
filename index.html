@@ -15,7 +15,7 @@
 
     function startApp() {
         console.log("starting app...");
-        var tradingCardsAddress = '0x98FdF79dcf599fDda1fBAEc23209891CD6cB80c1';
+        var tradingCardsAddress = '0x1387101cf6543df732d0b9a5aeab09be44fcbdb5';
         console.log(tradingcardsAbi);
         var tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
         tradingCards = tradingCardsContract.at(tradingCardsAddress);
@@ -38,12 +38,17 @@
                 // Call a function to update the UI with the new account
                 console.log("have account now do stuff");
 
-
-
+                getUnownedCardsCount().then(function(result) {
+                    displayUnownedCardsCount(result);
+                });
 
                 getCardsByOwner(userAccount).then(function(result) {
                     displayCards(result);
                 });
+
+
+
+
                 //
                 // return tradingCards.getCardsByOwner(userAccount, function(error, result){
                 //     if(!error) {
@@ -57,9 +62,9 @@
 
                 //displayCards(ownerCards);
             }
-        }, 10);
+        }, 3000);
         // create filter
-        var filter = tradingCards.NewCard({}, function (error, result) {
+        var filter = tradingCards.CardBought({}, function (error, result) {
             if (!error)
                 console.log("aaa");
                 console.log(result);
@@ -114,6 +119,19 @@
         //return tradingCards.getCardsByOwner(owner).call();
     }
 
+    function getUnownedCardsCount() {
+        return new Promise(function(resolve, reject){
+            tradingCards.getUnownedCardsCount(function(error, result){
+                if(error){
+                    reject(error);
+                }
+                else{
+                    resolve(result);
+                }
+            })
+        });
+    }
+
     function getCardDetails(id) {
         //return tradingCards.cards(id).call();
 
@@ -140,6 +158,15 @@
         //     }
         //
         // });
+    }
+
+    function displayUnownedCardsCount(count) {
+        console.log('display unowned count!!!');
+        $("#unownedCardsCount").empty();
+        $("#unownedCardsCount").append(`
+        <div>
+        Count: ${count}
+        </div>`);
     }
 
     function displayCards(ids) {
@@ -213,6 +240,11 @@ Trading Cards project
     Name: <input type="text" name="card_name">
 </form>
 
+
+<div id="unownedCardsCount">
+
+
+</div>
 
 <div id="cards">
 
