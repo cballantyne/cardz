@@ -1,8 +1,10 @@
 pragma solidity ^0.4.19;
 
-import "./ownable.sol";
+import "./Ownable.sol";
 
-contract CardFactory is Ownable {
+contract CardSet is Ownable {
+
+    string public name;
 
     event NewCard(uint cardId, string name, uint cardNum, uint instanceNum);
 
@@ -51,6 +53,13 @@ contract CardFactory is Ownable {
             }
         }
         return result;
+    }
+
+
+    function CardSet(address _owner, string _name)
+    public
+    {
+        name = _name;
     }
 
 }
