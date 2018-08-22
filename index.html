@@ -26,27 +26,22 @@
 
 <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
     <!--<h1 class="display-4">Pricing</h1>-->
-    <p class="lead">Quickly build an effective pricing table for your potential customers with this Bootstrap example. It's built with default Bootstrap components and utilities with little customization.</p>
+    <p class="lead" id="cardSetDescription"></p>
 
-    <p class="lead">
-    <div id="unownedCardsCount">
+    <p class="lead" id="unownedCardsCount">
 
-
-    </div>
     </p>
 </div>
 
 <div class="container">
     <div id="cards" class="row mb-3 text-center">
 
+        <!-- cards are displayed here -->
     </div>
 
     <footer class="pt-4 my-md-5 pt-md-5 border-top">
         <div class="row">
-            <div class="col-12 col-md">
-                <img class="mb-2" src="../../assets/brand/bootstrap-solid.svg" alt="" width="24" height="24">
-                <small class="d-block mb-3 text-muted">&copy; 2017-2018</small>
-            </div>
+
             <div class="col-6 col-md">
                 <h5>Features</h5>
                 <ul class="list-unstyled text-small">
@@ -97,9 +92,9 @@
 
     function startApp() {
         console.log("starting app...");
-        var tradingCardsAddress = '0x1387101cf6543df732d0b9a5aeab09be44fcbdb5';
+        const tradingCardsAddress = '0x1387101cf6543df732d0b9a5aeab09be44fcbdb5';
         console.log(tradingcardsAbi);
-        var tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
+        const tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
         tradingCards = tradingCardsContract.at(tradingCardsAddress);
 
 
@@ -125,6 +120,13 @@
                 getUnownedCardsCount().then(function(result) {
                     displayUnownedCardsCount(result);
                 });
+
+                getCardSetName().then(name => {
+                    $("#cardSetDescription").html('CardSet ' + name + ' at ' + tradingCardsAddress);
+                });
+
+
+                $("#cardSetAddress").html(tradingCardsAddress);
 
                 getCardsByOwner(userAccount).then(result => {
                     displayCards(result);
@@ -156,28 +158,26 @@
     }
 
     function getCardsByOwner(owner) {
-        console.log("get cards by owner1234");
-
         return promisify(tradingCards.getCardsByOwner, owner)
-
     }
 
+    function getCardSetName() {
+        return promisify(tradingCards.name);
+    }
     function getUnownedCardsCount() {
         return promisify(tradingCards.getUnownedCardsCount);
     }
 
     function getCardDetails(id) {
         console.log('getting card details....');
-
         return promisify(tradingCards.cards, id);
     }
 
     function displayUnownedCardsCount(count) {
-        console.log('display unowned count!!!');
         $("#unownedCardsCount").empty();
         $("#unownedCardsCount").append(`
         <div>
-        Count: ${count}
+        Hurry! Only ${count} cards left.
         </div>`);
     }
 
