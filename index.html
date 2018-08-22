@@ -1,17 +1,99 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+
     <meta charset="UTF-8">
-    <title>Trading Cards front-end</title>
-    <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <title>Luna Cards</title>
     <script language="javascript" type="text/javascript" src="js/web3.js-0.20.6/web3.min.js"></script>
 
     <script language="javascript" type="text/javascript" src="tradingcards.abi.js"></script>
 </head>
+
 <body>
+
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+    <h5 class="my-0 mr-md-auto font-weight-normal">Luna Cards</h5>
+    <nav class="my-2 my-md-0 mr-md-3">
+        <a class="p-2 text-dark" href="#">Features</a>
+        <a class="p-2 text-dark" href="#">Enterprise</a>
+        <a class="p-2 text-dark" href="#">Support</a>
+        <a class="p-2 text-dark" href="#">Pricing</a>
+    </nav>
+    <a class="btn btn-outline-primary" href="#">Sign up</a>
+</div>
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <!--<h1 class="display-4">Pricing</h1>-->
+    <p class="lead">Quickly build an effective pricing table for your potential customers with this Bootstrap example. It's built with default Bootstrap components and utilities with little customization.</p>
+
+    <p class="lead">
+    <div id="unownedCardsCount">
+
+
+    </div>
+    </p>
+</div>
+
+<div class="container">
+    <div id="cards" class="row mb-3 text-center">
+
+    </div>
+
+    <footer class="pt-4 my-md-5 pt-md-5 border-top">
+        <div class="row">
+            <div class="col-12 col-md">
+                <img class="mb-2" src="../../assets/brand/bootstrap-solid.svg" alt="" width="24" height="24">
+                <small class="d-block mb-3 text-muted">&copy; 2017-2018</small>
+            </div>
+            <div class="col-6 col-md">
+                <h5>Features</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="text-muted" href="#">Cool stuff</a></li>
+                    <li><a class="text-muted" href="#">Random feature</a></li>
+                    <li><a class="text-muted" href="#">Team feature</a></li>
+                    <li><a class="text-muted" href="#">Stuff for developers</a></li>
+                    <li><a class="text-muted" href="#">Another one</a></li>
+                    <li><a class="text-muted" href="#">Last time</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md">
+                <h5>Resources</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="text-muted" href="#">Resource</a></li>
+                    <li><a class="text-muted" href="#">Resource name</a></li>
+                    <li><a class="text-muted" href="#">Another resource</a></li>
+                    <li><a class="text-muted" href="#">Final resource</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md">
+                <h5>About</h5>
+                <ul class="list-unstyled text-small">
+                    <li><a class="text-muted" href="#">Team</a></li>
+                    <li><a class="text-muted" href="#">Locations</a></li>
+                    <li><a class="text-muted" href="#">Privacy</a></li>
+                    <li><a class="text-muted" href="#">Terms</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+
 <script>
     var tradingCards;
     var userAccount;
+
+    const promisify = (func, ...args) =>
+        new Promise((resolve, reject) =>
+            func(...args, (err, value) =>
+                (err ? reject(err) : resolve(value))
+            )
+        );
 
     function startApp() {
         console.log("starting app...");
@@ -20,6 +102,8 @@
         var tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
         tradingCards = tradingCardsContract.at(tradingCardsAddress);
 
+
+        // localStorage.setItem('cardSetContract', '0x1387101cf6543df732d0b9a5aeab09be44fcbdb5');
 
         console.log(tradingCards);
 
@@ -42,32 +126,16 @@
                     displayUnownedCardsCount(result);
                 });
 
-                getCardsByOwner(userAccount).then(function(result) {
+                getCardsByOwner(userAccount).then(result => {
                     displayCards(result);
                 });
-
-
-
-
-                //
-                // return tradingCards.getCardsByOwner(userAccount, function(error, result){
-                //     if(!error) {
-                //         console.log(JSON.stringify(result));
-                //         displayCards(result);
-                //     } else {
-                //         console.error(error);
-                //     }
-                //
-                // });
-
-                //displayCards(ownerCards);
             }
         }, 3000);
         // create filter
         var filter = tradingCards.CardBought({}, function (error, result) {
             if (!error)
                 console.log("aaa");
-                console.log(result);
+            console.log(result);
             /*
             {
                 address: '0x8718986382264244252fc4abd0339eb8d5708727',
@@ -90,74 +158,18 @@
     function getCardsByOwner(owner) {
         console.log("get cards by owner1234");
 
+        return promisify(tradingCards.getCardsByOwner, owner)
 
-        return new Promise(function(resolve, reject){
-            tradingCards.getCardsByOwner(owner, function(error, result){
-                if(error){
-                    reject(error);
-                }
-                else{
-                    resolve(result);
-                }
-            })
-        });
-
-
-        //return tradingCards.getCardsByOwner(owner).then(function(result) {return result;});
-
-
-        // tradingCards.getCardsByOwner(owner, function(error, result){
-        //     if(!error) {
-        //         console.log(JSON.stringify(result));
-        //         return result;
-        //     } else {
-        //         console.error(error);
-        //     }
-        //
-        // });
-
-        //return tradingCards.getCardsByOwner(owner).call();
     }
 
     function getUnownedCardsCount() {
-        return new Promise(function(resolve, reject){
-            tradingCards.getUnownedCardsCount(function(error, result){
-                if(error){
-                    reject(error);
-                }
-                else{
-                    resolve(result);
-                }
-            })
-        });
+        return promisify(tradingCards.getUnownedCardsCount);
     }
 
     function getCardDetails(id) {
-        //return tradingCards.cards(id).call();
-
         console.log('getting card details....');
 
-        return new Promise(function(resolve, reject){
-            tradingCards.cards(id, function(error, result){
-                if(error){
-                    reject(error);
-                }
-                else{
-                    resolve(result);
-                }
-            })
-        });
-
-
-        // return tradingCards.cards(id, function(error, result){
-        //     if(!error) {
-        //         console.log(JSON.stringify(result));
-        //         console.log('got card details!!!');
-        //     } else {
-        //         console.error(error);
-        //     }
-        //
-        // });
+        return promisify(tradingCards.cards, id);
     }
 
     function displayUnownedCardsCount(count) {
@@ -172,39 +184,33 @@
     function displayCards(ids) {
         $("#cards").empty();
         for (id of ids) {
-            console.log('id looping');
             console.log(id);
             // Look up card details from our contract. Returns a `Card` object
-
-            // getCardDetails(id, function(error, result) {
-            //     if(!error) {
-            //         console.log(JSON.stringify(result));
-            //         console.log('got some cards!!!');
-            //         // Using ES6's "template literals" to inject variables into the HTML.
-            //         // Append each one to our #card div
-            //         $("#cards").append(`<div class="card">
-            //   <ul>
-            //     <li>Name: ${result.name}</li>
-            //   </ul>
-            // </div>`);
-            //     } else {
-            //         console.error(error);
-            //     }
-            // });
-
-
-
             getCardDetails(id)
-                .then(function(card) {
+                .then(card => {
                     console.log('aa');
                     console.log(card);
                     // Using ES6's "template literals" to inject variables into the HTML.
                     // Append each one to our #card div
-                    $("#cards").append(`<div class="card">
-              <ul>
-                <li>Name: ${card[0]}</li>
-              </ul>
-            </div>`);
+                    $("#cards").append(`
+<div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 d-flex align-items-stretch">
+            <div class="card card-cascade wider mb-4 shadow-sm">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">${card[0]}</h4>
+                </div>
+                <div class="card-body">
+
+                    <img class="card-img-top" src="images/${card[0]}.jpeg" alt="Card image cap">
+
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li>O.G => 23</li>
+                        <li>Coding => 44</li>
+                    </ul>
+                    <small class="text-muted">${card[1]}/34</small>
+                </div>
+            </div>
+        </div>
+`);
                 });
         }
     }
@@ -231,25 +237,6 @@
 
     })
 </script>
-
-
-Trading Cards project
-
-
-<form >
-    Name: <input type="text" name="card_name">
-</form>
-
-
-<div id="unownedCardsCount">
-
-
-</div>
-
-<div id="cards">
-
-
-</div>
 
 </body>
 </html>
