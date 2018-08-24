@@ -35,6 +35,11 @@ contract CardSet is Ownable {
         return rand % dnaModulus;
     }
 
+    function _generateRandomNumber(uint _max) private view returns (uint) {
+        uint rand = uint(keccak256(now + uint(msg.sender)));
+        return rand % _max;
+    }
+
     function getUnownedCardsCount() public view returns (uint) {
         uint count = 0;
         for (uint i = 0; i < cards.length; i++) {
@@ -70,6 +75,16 @@ contract CardSet is Ownable {
         CardBought(_cardId, msg.sender);
     }
 
+    function buyRandomCard() public {
+        uint[] memory unownedCards = getCardsUnowned();
+        if (unownedCards.length-1 == 0) {
+            buyCard(unownedCards[0]);
+        } else {
+            uint cardIdToBuy = unownedCards[_generateRandomNumber(unownedCards.length-1)];
+            buyCard(cardIdToBuy);
+        }
+    }
+
     function getCardsByOwner(address _owner) external view returns(uint[]) {
         uint[] memory result = new uint[](ownerCardCount[_owner]);
         uint counter = 0;
@@ -81,6 +96,20 @@ contract CardSet is Ownable {
         }
         return result;
     }
+
+    function getCardsUnowned() public view returns(uint[]) {
+        uint cardsUnownedCount = getUnownedCardsCount();
+        uint[] memory result = new uint[](cardsUnownedCount);
+        uint counter = 0;
+        for (uint i = 0; i < cards.length; i++) {
+            if (cardToOwner[i] == 0) {
+                result[counter] = i;
+                counter++;
+            }
+        }
+        return result;
+    }
+
 
     function CardSet(address _owner, string _name)
     public

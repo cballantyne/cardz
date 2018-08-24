@@ -28,6 +28,7 @@
     <p class="lead" id="unownedCardsCount">
 
     </p>
+    <a href="#" id="buyRandomCard">Buy Random Card</a>
 </div>
 
 <div class="container">
@@ -58,7 +59,7 @@
 
     function startApp() {
         console.log("starting app...");
-        const tradingCardsAddress = '0x1387101cf6543df732d0b9a5aeab09be44fcbdb5';
+        const tradingCardsAddress = '0xdf79c97308a77274a494ffe3a463dfa94c6c5a0b';
         console.log(tradingcardsAbi);
         const tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
         tradingCards = tradingCardsContract.at(tradingCardsAddress);
@@ -99,6 +100,14 @@
                 });
             }
         }, 3000);
+
+
+        // onclick event
+        $("#buyRandomCard").click(function() {
+            buyRandomCard();
+        });
+
+
         // create filter
         var filter = tradingCards.CardBought({}, function (error, result) {
             if (!error)
@@ -132,6 +141,9 @@
     }
     function getUnownedCardsCount() {
         return promisify(tradingCards.getUnownedCardsCount);
+    }
+    function buyRandomCard() {
+        return promisify(tradingCards.buyRandomCard);
     }
 
     function getCardDetails(id) {
