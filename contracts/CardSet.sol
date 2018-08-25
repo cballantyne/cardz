@@ -50,19 +50,24 @@ contract CardSet is Ownable {
         return count;
     }
 
-    function mintCards(string _name, uint16 _instanceCount) public {
+    function getUniqueCardsCount() public view returns (uint16) {
+        uint16 cardNum = 0;
+        if (cards.length > 0) {
+            cardNum = uint16(cards[cards.length-1].cardNum);
+        }
+        return cardNum;
+    }
+
+    function mintCards(string _name, uint16 _instanceCount) public onlyOwner {
         // require(ownerZombieCount[msg.sender] == 0);
         uint randDna = _generateRandomDna(_name);
 
         // randDna = randDna - randDna % 100;
         // _createZombie(_name, randDna);
-        uint16 cardNum = 1;
-        if (cards.length > 0) {
-            cardNum = uint16(cards[cards.length-1].cardNum+1);
-        }
+        uint16 nextCardNum = getUniqueCardsCount() + 1;
 
         for (uint16 i = 1; i <= _instanceCount; i++) {
-            _createCard(_name, cardNum, i);
+            _createCard(_name, nextCardNum, i);
         }
     }
 
@@ -115,6 +120,7 @@ contract CardSet is Ownable {
     public
     {
         name = _name;
+        owner = _owner;
     }
 
-}
+}}

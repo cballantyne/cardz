@@ -175,33 +175,22 @@
             mintCards(name, instanceCount);
         });
 
-
-
-
-        // create filter
-        var filter = tradingCards.CardBought({}, function (error, result) {
+        // event filters
+        tradingCards.CardBought({}, function (error, result) {
             if (!error)
-                console.log("aaa");
-            console.log(result);
-            /*
-            {
-                address: '0x8718986382264244252fc4abd0339eb8d5708727',
-                topics: "0x12345678901234567890123456789012", "0x0000000000000000000000000000000000000000000000000000000000000005",
-                data: "0x0000000000000000000000000000000000000000000000000000000000000001",
-                ...
-            }
-            */
+                console.log(result);
+                let event = result.args;
+                console.log(`CardBought with cardId${event.cardId}, owner:${event.owner}`);
         });
 
-        // tradingCards.events.NewCard()
-        //     .on("data", function(event) {
-        //         let data = event.returnValues;
-        //         console.log("new card created");
-        //         // The current user just received a zombie!
-        //         // Do something here to update the UI to show it
-        //     }).on("error", console.error);
-    }
+        tradingCards.CardsMinted({}, function (error, result) {
+            if (!error)
+                console.log(result);
+            let event = result.args;
+            console.log(`CardsMinted with cardId${event.cardId}, name:${event.name}, cardNum:${event.cardNum}, instanceNum:${event.instanceNum}`);
+        });
 
+    }
 
 
     function getCardsByOwner(owner) {

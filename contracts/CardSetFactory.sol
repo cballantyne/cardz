@@ -8,14 +8,14 @@ contract CardSetFactory is Factory {
     /*
      * Public functions
      */
-    /// @param _owner Owner of CardSet.
     /// @param _name Name of CardSet
     /// @return Returns cardset address.
-    function create(address _owner, string _name)
+    function create(string _name)
     public
     returns (address cardSet)
     {
-        cardSet = new CardSet(_owner, _name);
+        address _owner = msg.sender;
+        cardSet = new CardSet(msg.sender, _name);
         register(cardSet);
     }
 
