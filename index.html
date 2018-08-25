@@ -25,6 +25,17 @@
     <!--<h1 class="display-4">Pricing</h1>-->
     <p class="lead" id="cardSetDescription"></p>
 
+    <p class="lead"><a href="#" id="submitCardSetAddressShow">[select different CardSet]</a></p>
+
+    <p class="lead" id="cardSetAddressForm">
+
+        <input type="text" id="cardSetAddress">
+        <input type="submit" id="submitCardSetAddress" value="Set">
+        <input type="submit" id="submitCardSetAddressCancel" value="Cancel">
+
+    </p>
+
+
     <p class="lead" id="unownedCardsCount">
 
     </p>
@@ -49,6 +60,11 @@
 <script>
     var tradingCards;
     var userAccount;
+    const defaultTradingCardsAddress = '0xa98b3ca48aa50364f7b30d68f8d5153409b5dc1e';
+    if (localStorage.getItem('cardSetContract') === null) {
+        localStorage.setItem('cardSetContract', defaultTradingCardsAddress);
+    }
+    let tradingCardsAddress = localStorage.getItem('cardSetContract');
 
     const promisify = (func, ...args) =>
         new Promise((resolve, reject) =>
@@ -59,8 +75,10 @@
 
     function startApp() {
         console.log("starting app...");
-        const tradingCardsAddress = '0xa98b3ca48aa50364f7b30d68f8d5153409b5dc1e';
         console.log(tradingcardsAbi);
+
+        $("#cardSetAddressForm").hide();
+
         const tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
         tradingCards = tradingCardsContract.at(tradingCardsAddress);
 
@@ -111,6 +129,22 @@
         $("#buyRandomCard").click(function() {
             buyRandomCard();
         });
+
+        $("#submitCardSetAddress").click(function() {
+            const cardSetAddress = $("#cardSetAddress").val();
+            localStorage.setItem('cardSetContract', cardSetAddress);
+        });
+
+
+        $("#submitCardSetAddressShow").click(function() {
+            $("#cardSetAddressForm").show();
+        });
+
+        $("#submitCardSetAddressCancel").click(function() {
+            $("#cardSetAddressForm").hide();
+        });
+
+
 
 
         // create filter
