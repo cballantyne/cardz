@@ -59,7 +59,7 @@
 
     function startApp() {
         console.log("starting app...");
-        const tradingCardsAddress = '0xdf79c97308a77274a494ffe3a463dfa94c6c5a0b';
+        const tradingCardsAddress = '0xa98b3ca48aa50364f7b30d68f8d5153409b5dc1e';
         console.log(tradingcardsAbi);
         const tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
         tradingCards = tradingCardsContract.at(tradingCardsAddress);
@@ -97,7 +97,12 @@
 
                 getCardsByOwner(userAccount).then(result => {
                     displayCards(result);
+                    return getUniqueCardsCount();
+                }).then(result => {
+                    console.log('uniqueCount:' + result);
+                    $(".uniqueCardCount").text(result);
                 });
+
             }
         }, 3000);
 
@@ -142,6 +147,9 @@
     function getUnownedCardsCount() {
         return promisify(tradingCards.getUnownedCardsCount);
     }
+    function getUniqueCardsCount() {
+        return promisify(tradingCards.getUniqueCardsCount);
+    }
     function buyRandomCard() {
         return promisify(tradingCards.buyRandomCard);
     }
@@ -184,7 +192,7 @@
                         <li>O.G => 23</li>
                         <li>Coding => 44</li>
                     </ul>
-                    <small class="text-muted">${card[1]}/34</small>
+                    <small class="text-muted">${card[1]}/<span class="uniqueCardCount"></span></small>
                 </div>
             </div>
         </div>
