@@ -25,16 +25,7 @@
     <!--<h1 class="display-4">Pricing</h1>-->
     <p class="lead" id="cardSetDescription"></p>
 
-    <p class="lead"><a href="#" id="submitCardSetAddressShow">[select different CardSet]</a></p>
-
-    <p class="lead" id="cardSetAddressForm">
-
-        <input type="text" id="cardSetAddress">
-        <input type="submit" id="submitCardSetAddress" value="Set">
-        <input type="submit" id="submitCardSetAddressCancel" value="Cancel">
-
-    </p>
-
+    <p class="lead"></p>
 
     <p class="lead" id="unownedCardsCount">
 
@@ -49,8 +40,15 @@
     </div>
 
     <footer class="pt-4 my-md-5 pt-md-5 border-top">
+        <div class="row">
 
-        <a href="#" data-toggle="modal" data-target="#exampleModal">Mint Cards</a>
+            <div class="col-6 col-md">
+                <ul class="list-unstyled text-small">
+                    <li><a href="#" data-toggle="modal" data-target="#exampleModal">Mint Cards</a></li>
+                    <li><a href="#" data-toggle="modal" data-target="#changeCardSetModal">Change CardSet</a></li>
+                </ul>
+            </div>
+        </div>
     </footer>
 </div>
 
@@ -74,6 +72,30 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="mintCardsBtn">Mint Cards</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal ChangeSet -->
+<div class="modal fade" id="changeCardSetModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeCardSetModalLabel">Change CardSet</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    CardSet Address: <input type="text" id="cardSetAddress" class="col-lg-10"><br>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="submitCardSetAddressCancel">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitCardSetAddress">Set</button>
             </div>
         </div>
     </div>
@@ -103,8 +125,6 @@
         console.log("starting app...");
         console.log(tradingcardsAbi);
 
-        $("#cardSetAddressForm").hide();
-
         const tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
         tradingCards = tradingCardsContract.at(tradingCardsAddress);
 
@@ -128,25 +148,7 @@
                 // Call a function to update the UI with the new account
                 console.log("have account now do stuff");
 
-                getUnownedCardsCount().then(function(result) {
-                    displayUnownedCardsCount(result);
-                });
-
-                getCardSetName().then(name => {
-                    $("#cardSetDescription").html('CardSet ' + name + ' at ' + tradingCardsAddress);
-                });
-
-
-                $("#cardSetAddress").html(tradingCardsAddress);
-
-                getCardsByOwner(userAccount).then(result => {
-                    displayCards(result);
-                    return getUniqueCardsCount();
-                }).then(result => {
-                    console.log('uniqueCount:' + result);
-                    $(".uniqueCardCount").text(result);
-                });
-
+                displayCardSet(userAccount);
             }
         }, 3000);
 
@@ -159,16 +161,15 @@
         $("#submitCardSetAddress").click(function() {
             const cardSetAddress = $("#cardSetAddress").val();
             localStorage.setItem('cardSetContract', cardSetAddress);
+            tradingCardsAddress = cardSetAddress;
+
+            const tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
+            tradingCards = tradingCardsContract.at(tradingCardsAddress);
+
+            $("#changeCardSetModal").modal('toggle');
+            displayCardSet(userAccount);
         });
 
-
-        $("#submitCardSetAddressShow").click(function() {
-            $("#cardSetAddressForm").show();
-        });
-
-        $("#submitCardSetAddressCancel").click(function() {
-            $("#cardSetAddressForm").hide();
-        });
         $("#mintCardsBtn").click(function() {
             const name = $("#mint_name").val();
             const instanceCount = $("#mint_instanceCount").val();
@@ -177,19 +178,53 @@
 
         // event filters
         tradingCards.CardBought({}, function (error, result) {
-            if (!error)
+            if (!error) {
                 console.log(result);
                 let event = result.args;
                 console.log(`CardBought with cardId${event.cardId}, owner:${event.owner}`);
+                displayUnownedCardsCount();
+                displayCardsForOwner(userAccount);
+            }
         });
 
         tradingCards.CardsMinted({}, function (error, result) {
-            if (!error)
+            if (!error) {
                 console.log(result);
-            let event = result.args;
-            console.log(`CardsMinted with cardId${event.cardId}, name:${event.name}, cardNum:${event.cardNum}, instanceNum:${event.instanceNum}`);
+                let event = result.args;
+                console.log(`CardsMinted with cardId${event.cardId}, name:${event.name}, cardNum:${event.cardNum}, instanceNum:${event.instanceNum}`);
+                displayUnownedCardsCount();
+                displayCardsForOwner(userAccount);
+            }
         });
 
+    }
+
+    function displayCardSet(owner) {
+        getCardSetName().then(name => {
+            $("#cardSetDescription").html('CardSet ' + name + ' at ' + tradingCardsAddress);
+        });
+
+        displayCardsForOwner(owner);
+        displayUnownedCardsCount();
+    }
+
+    function displayCardsForOwner(owner) {
+        getCardsByOwner(owner).then(result => {
+            displayCards(result);
+            return getUniqueCardsCount();
+        }).then(result => {
+            console.log('uniqueCount:' + result);
+            $(".uniqueCardCount").text(result);
+        });
+    }
+    function displayUnownedCardsCount() {
+        getUnownedCardsCount().then(count => {
+            $("#unownedCardsCount").empty();
+            $("#unownedCardsCount").append(`
+                <div>
+                Hurry! Only ${count} cards left.
+                </div>`);
+        });
     }
 
 
@@ -215,14 +250,6 @@
 
     function getCardDetails(id) {
         return promisify(tradingCards.cards, id);
-    }
-
-    function displayUnownedCardsCount(count) {
-        $("#unownedCardsCount").empty();
-        $("#unownedCardsCount").append(`
-        <div>
-        Hurry! Only ${count} cards left.
-        </div>`);
     }
 
     function displayCards(ids) {
