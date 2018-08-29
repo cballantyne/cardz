@@ -1,0 +1,20 @@
+{
+    "id": "whatever",
+    "name": "start",
+    "cards": [
+        {
+            "name":"kazoo",
+            "abilities": [
+                {"name": "O.G", "level": 99},
+                {"name": "Coding", "level": 77}
+            ]
+        },
+        {
+            "name":"wow",
+            "abilities": [
+                {"name": "Saying WOW", "level": 99},
+                {"name": "Winking", "level": 77}
+            ]
+        }
+    ]
+}

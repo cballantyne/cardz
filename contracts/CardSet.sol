@@ -6,7 +6,8 @@ contract CardSet is Ownable {
 
     string public name;
 
-    event CardsMinted(uint cardId, string name, uint cardNum, uint instanceNum);
+    event CardsMinted(string name, uint cardNum, uint instanceCount);
+    event CardMinted(uint cardId, string name, uint cardNum, uint instanceNum);
     event CardBought(uint cardId, address owner);
 
     uint dnaDigits = 16;
@@ -27,7 +28,7 @@ contract CardSet is Ownable {
 
     function _createCard(string _name, uint16 _cardNum, uint16 _instanceNum) internal {
         uint id = cards.push(Card(_name, _cardNum, _instanceNum)) - 1;
-        CardsMinted(id, _name, _cardNum, _instanceNum);
+        CardMinted(id, _name, _cardNum, _instanceNum);
     }
 
     function _generateRandomDna(string _str) private view returns (uint) {
@@ -69,6 +70,7 @@ contract CardSet is Ownable {
         for (uint16 i = 1; i <= _instanceCount; i++) {
             _createCard(_name, nextCardNum, i);
         }
+        CardsMinted(_name, nextCardNum, _instanceCount);
     }
 
     function buyCard(uint _cardId) public {
@@ -123,4 +125,4 @@ contract CardSet is Ownable {
         owner = _owner;
     }
 
-}}
+}

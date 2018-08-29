@@ -17,21 +17,18 @@ var tradingcardsAbi = [
         "type": "event"
     },
     {
-        "anonymous": false,
+        "constant": false,
         "inputs": [
             {
-                "indexed": false,
-                "name": "cardId",
+                "name": "_cardId",
                 "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "name": "owner",
-                "type": "address"
             }
         ],
-        "name": "CardBought",
-        "type": "event"
+        "name": "buyCard",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
     },
     {
         "anonymous": false,
@@ -57,22 +54,47 @@ var tradingcardsAbi = [
                 "type": "uint256"
             }
         ],
+        "name": "CardMinted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "name": "cardNum",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "name": "instanceCount",
+                "type": "uint256"
+            }
+        ],
         "name": "CardsMinted",
         "type": "event"
     },
     {
-        "constant": false,
+        "anonymous": false,
         "inputs": [
             {
-                "name": "_cardId",
+                "indexed": false,
+                "name": "cardId",
                 "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "name": "owner",
+                "type": "address"
             }
         ],
-        "name": "buyCard",
-        "outputs": [],
-        "payable": false,
-        "stateMutability": "nonpayable",
-        "type": "function"
+        "name": "CardBought",
+        "type": "event"
     },
     {
         "constant": false,

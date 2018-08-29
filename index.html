@@ -44,7 +44,7 @@
 
             <div class="col-6 col-md">
                 <ul class="list-unstyled text-small">
-                    <li><a href="#" data-toggle="modal" data-target="#exampleModal">Mint Cards</a></li>
+                    <li><a href="#" data-toggle="modal" data-target="#mintCardsModal">Mint Cards</a></li>
                     <li><a href="#" data-toggle="modal" data-target="#changeCardSetModal">Change CardSet</a></li>
                 </ul>
             </div>
@@ -54,7 +54,7 @@
 
 
 <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="mintCardsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -100,8 +100,10 @@
         </div>
     </div>
 </div>
-
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
 
@@ -191,7 +193,7 @@
             if (!error) {
                 console.log(result);
                 let event = result.args;
-                console.log(`CardsMinted with cardId${event.cardId}, name:${event.name}, cardNum:${event.cardNum}, instanceNum:${event.instanceNum}`);
+                console.log(`CardsMinted with name:${event.name}, cardNum:${event.cardNum}, instanceCount:${event.instanceCount}`);
                 displayUnownedCardsCount();
                 displayCardsForOwner(userAccount);
             }
@@ -209,14 +211,32 @@
     }
 
     function displayCardsForOwner(owner) {
-        getCardsByOwner(owner).then(result => {
-            displayCards(result);
-            return getUniqueCardsCount();
-        }).then(result => {
-            console.log('uniqueCount:' + result);
-            $(".uniqueCardCount").text(result);
+        getCardsByOwner(owner)
+            .then(result => {
+                displayCards(result);
+                return getUniqueCardsCount();
+            })
+            .then(result => {
+               console.log('uniqueCount:' + result);
+               $(".uniqueCardCount").text(result);
+               displayCardsMetadata();
+            });
+    }
+
+    function displayCardsMetadata() {
+        // add abilities display
+        $.getJSON( "js/cardset.metadata.json", function( data ) {
+            for (card of data.cards) {
+                $(`.${card.name}_abilities`).empty();
+                if (card.abilities) {
+                    for (ability of card.abilities) {
+                        $(`.${card.name}_abilities`).append(`<li>${ability.name} = ${ability.level}</li>`);
+                    }
+                }
+            }
         });
     }
+
     function displayUnownedCardsCount() {
         getUnownedCardsCount().then(count => {
             $("#unownedCardsCount").empty();
@@ -245,6 +265,7 @@
         return promisify(tradingCards.buyRandomCard);
     }
     function mintCards(name, instanceCount) {
+        $("#mintCardsModal").modal('toggle');
         return promisify(tradingCards.mintCards, name, instanceCount);
     }
 
@@ -273,9 +294,8 @@
 
                     <img class="card-img-top" src="images/${card[0]}.jpeg" alt="Card image cap">
 
-                    <ul class="list-unstyled mt-3 mb-4">
-                        <li>O.G => 23</li>
-                        <li>Coding => 44</li>
+                    <ul class="list-unstyled mt-3 mb-4 ${card[0]}_abilities">
+
                     </ul>
                     <small class="text-muted">${card[1]}/<span class="uniqueCardCount"></span></small>
                 </div>
