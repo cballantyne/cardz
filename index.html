@@ -17,7 +17,7 @@
     <h5 class="my-0 mr-md-auto font-weight-normal">Luna Cards</h5>
     <nav class="my-2 my-md-0 mr-md-3">
         <a class="p-2 text-dark" href="https://github.com/cballantyne/cardz">Github</a>
-        <a class="p-2 text-dark" href="#">WTF is this?</a>
+        <a class="p-2 text-dark" href="#" id="wtfLink">WTF is this?</a>
     </nav>
 </div>
 
@@ -100,6 +100,53 @@
         </div>
     </div>
 </div>
+
+
+<!-- Modal Transfer -->
+<div class="modal fade" id="transferModal" tabindex="-1" role="dialog" aria-labelledby="transferModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transferModalLabel">Transfer Card</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="cardToTransfer"></div>
+                <form>
+                    To: <input type="text" id="transfer_to" class="col-lg-10"><br>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="transferCardBtn">Transfer Card</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal wtf -->
+<div class="modal fade" id="wtfModal" tabindex="-1" role="dialog" aria-labelledby="transferModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="wtfModalLabel">WTF</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Trading cards on Ethereum using ERC721.</p>
+                <p>"What happened to you, Dillon? You used to be someone I could trust."</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Gotcha</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script
         src="https://code.jquery.com/jquery-3.3.1.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
@@ -178,6 +225,17 @@
             mintCards(name, instanceCount);
         });
 
+        $('body').on('click', 'a.cardTransferLink', function() {
+
+
+            $("#transferModal").modal('toggle');
+        });
+
+        $('body').on('click', 'a#wtfLink', function() {
+            $("#wtfModal").modal('toggle');
+        });
+
+
         // event filters
         tradingCards.CardBought({}, function (error, result) {
             if (!error) {
@@ -227,10 +285,14 @@
         // add abilities display
         $.getJSON( "js/cardset.metadata.json", function( data ) {
             for (card of data.cards) {
-                $(`.${card.name}_abilities`).empty();
+                $(`.${card.id}_name`).empty();
+                $(`.${card.id}_name`).append(`${card.name}`);
+
+
+                $(`.${card.id}_abilities`).empty();
                 if (card.abilities) {
                     for (ability of card.abilities) {
-                        $(`.${card.name}_abilities`).append(`<li>${ability.name} = ${ability.level}</li>`);
+                        $(`.${card.id}_abilities`).append(`<li>${ability.name} = ${ability.level}</li>`);
                     }
                 }
             }
@@ -276,11 +338,10 @@
     function displayCards(ids) {
         $("#cards").empty();
         for (id of ids) {
-            console.log(id);
+            const currentId = id.toNumber();
             // Look up card details from our contract. Returns a `Card` object
-            getCardDetails(id)
+            getCardDetails(currentId)
                 .then(card => {
-                    console.log('aa');
                     console.log(card);
                     // Using ES6's "template literals" to inject variables into the HTML.
                     // Append each one to our #card div
@@ -288,7 +349,7 @@
 <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4 d-flex align-items-stretch">
             <div class="card card-cascade wider mb-4 shadow-sm">
                 <div class="card-header">
-                    <h4 class="my-0 font-weight-normal">${card[0]}</h4>
+                    <h4 class="my-0 font-weight-normal ${card[0]}_name">${card[0]}</h4>
                 </div>
                 <div class="card-body">
 
@@ -298,6 +359,11 @@
 
                     </ul>
                     <small class="text-muted">${card[1]}/<span class="uniqueCardCount"></span></small>
+
+
+                </div>
+                <div class="card-footer text-muted">
+                    <a href="#" class="cardTransferLink" id="cardTransferLink_${currentId}">Transfer ${currentId}</a>
                 </div>
             </div>
         </div>

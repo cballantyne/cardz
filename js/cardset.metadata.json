@@ -3,14 +3,16 @@
     "name": "start",
     "cards": [
         {
-            "name":"kazoo",
+            "id":"kazoo",
+            "name": "Kazoo Kid",
             "abilities": [
                 {"name": "O.G", "level": 99},
                 {"name": "Coding", "level": 77}
             ]
         },
         {
-            "name":"wow",
+            "id":"wow",
+            "name": "Wow Guy",
             "abilities": [
                 {"name": "Saying WOW", "level": 99},
                 {"name": "Winking", "level": 77}

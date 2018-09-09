@@ -1,8 +1,9 @@
 pragma solidity ^0.4.19;
 
 import "./Ownable.sol";
+import "./ERC721Basic.sol";
 
-contract CardSet is Ownable {
+contract CardSet is Ownable, ERC721Basic {
 
     string public name;
 
@@ -21,9 +22,6 @@ contract CardSet is Ownable {
     }
 
     Card[] public cards;
-
-    mapping (uint => address) public cardToOwner;
-    mapping (address => uint) ownerCardCount;
 
 
     function _createCard(string _name, uint16 _cardNum, uint16 _instanceNum) internal {
@@ -59,7 +57,7 @@ contract CardSet is Ownable {
         return cardNum;
     }
 
-    function mintCards(string _name, uint16 _instanceCount) public onlyOwner {
+    function mintCards(string _name, uint16 _instanceCount) public onlyContractOwner {
         // require(ownerZombieCount[msg.sender] == 0);
         uint randDna = _generateRandomDna(_name);
 
@@ -91,6 +89,8 @@ contract CardSet is Ownable {
             buyCard(cardIdToBuy);
         }
     }
+
+
 
     function getCardsByOwner(address _owner) external view returns(uint[]) {
         uint[] memory result = new uint[](ownerCardCount[_owner]);
