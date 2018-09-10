@@ -225,10 +225,29 @@
             mintCards(name, instanceCount);
         });
 
-        $('body').on('click', 'a.cardTransferLink', function() {
+        $("#transferCardBtn").click(function() {
+            const cardId = $("#transfer_cardId").val();
+            const to = $("#transfer_to").val();
+            transferCard(cardId, to);
+        });
 
-
+        $('body').on('click', 'a.cardTransferLink', function(event) {
+            const cardId = event.target.id.replace("cardTransferLink_","");
             $("#transferModal").modal('toggle');
+            $("#cardToTransfer").empty();
+
+            getCardDetails(cardId)
+                .then((card) => {
+                    $.getJSON( "js/cardset.metadata.json", function( data ) {
+                        for (cardMetadata of data.cards) {
+                            if (card[0] === cardMetadata.id) {
+                                $("#cardToTransfer").append(`
+                                <input type="hidden" id="transfer_cardId" value="${cardId}"/>
+                                Card: ${cardMetadata.name}</br>`);
+                            }
+                        }
+                    });
+                });
         });
 
         $('body').on('click', 'a#wtfLink', function() {
@@ -331,6 +350,14 @@
         return promisify(tradingCards.mintCards, name, instanceCount);
     }
 
+    function transferCard(cardId, to) {
+        $("#transferModal").modal('toggle');
+
+        console.log(`from:${userAccount}`);
+        console.log(`to:${to}`);
+        console.log(`cardId:${cardId}`);
+        return promisify(tradingCards.transferFrom, userAccount, to, cardId);
+    }
     function getCardDetails(id) {
         return promisify(tradingCards.cards, id);
     }
@@ -358,12 +385,12 @@
                     <ul class="list-unstyled mt-3 mb-4 ${card[0]}_abilities">
 
                     </ul>
-                    <small class="text-muted">${card[1]}/<span class="uniqueCardCount"></span></small>
+                    <small class="text-muted">${card[1]}/<span class="uniqueCardCount"></span>__${currentId}</small>
 
 
                 </div>
                 <div class="card-footer text-muted">
-                    <a href="#" class="cardTransferLink" id="cardTransferLink_${currentId}">Transfer ${currentId}</a>
+                    <a href="#" class="cardTransferLink" id="cardTransferLink_${currentId}">Transfer</a>
                 </div>
             </div>
         </div>
