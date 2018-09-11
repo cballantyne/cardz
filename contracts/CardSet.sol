@@ -1,9 +1,9 @@
 pragma solidity ^0.4.19;
 
 import "./Ownable.sol";
-import "./ERC721Basic.sol";
+import "./ERC721Enumerable.sol";
 
-contract CardSet is Ownable, ERC721Basic {
+contract CardSet is Ownable, ERC721Enumerable {
 
     string public name;
 
@@ -26,6 +26,7 @@ contract CardSet is Ownable, ERC721Basic {
 
     function _createCard(string _name, uint16 _cardNum, uint16 _instanceNum) internal {
         uint id = cards.push(Card(_name, _cardNum, _instanceNum)) - 1;
+        super._mint(this, id);
         CardMinted(id, _name, _cardNum, _instanceNum);
     }
 
@@ -41,8 +42,8 @@ contract CardSet is Ownable, ERC721Basic {
 
     function getUnownedCardsCount() public view returns (uint) {
         uint count = 0;
-        for (uint i = 0; i < cards.length; i++) {
-            if (cardToOwner[i] == 0) {
+        for (uint i = 0; i < totalSupply(); i++) {
+            if (ownerOf(tokenByIndex(i)) == 0) {
                 count++;
             }
         }
@@ -72,11 +73,8 @@ contract CardSet is Ownable, ERC721Basic {
     }
 
     function buyCard(uint _cardId) public {
-        //security so can only buy unowned cards.
-        require(cardToOwner[_cardId] == 0);
+        transferFrom(this, msg.sender, _cardId);
 
-        cardToOwner[_cardId] = msg.sender;
-        ownerCardCount[msg.sender]++;
         CardBought(_cardId, msg.sender);
     }
 
@@ -90,16 +88,10 @@ contract CardSet is Ownable, ERC721Basic {
         }
     }
 
-
-
     function getCardsByOwner(address _owner) external view returns(uint[]) {
-        uint[] memory result = new uint[](ownerCardCount[_owner]);
-        uint counter = 0;
-        for (uint i = 0; i < cards.length; i++) {
-            if (cardToOwner[i] == _owner) {
-                result[counter] = i;
-                counter++;
-            }
+        uint[] memory result = new uint[](balanceOf(_owner));
+        for (uint i = 0; i < balanceOf(_owner); i++) {
+            result[i] = tokenOfOwnerByIndex(_owner, i);
         }
         return result;
     }
@@ -108,9 +100,9 @@ contract CardSet is Ownable, ERC721Basic {
         uint cardsUnownedCount = getUnownedCardsCount();
         uint[] memory result = new uint[](cardsUnownedCount);
         uint counter = 0;
-        for (uint i = 0; i < cards.length; i++) {
-            if (cardToOwner[i] == 0) {
-                result[counter] = i;
+        for (uint i = 0; i < totalSupply(); i++) {
+            if (ownerOf(tokenByIndex(i)) == 0) {
+                result[counter] = tokenByIndex(i);
                 counter++;
             }
         }
