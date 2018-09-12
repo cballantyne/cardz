@@ -204,7 +204,8 @@
 
         const tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
         tradingCards = tradingCardsContract.at(tradingCardsAddress);
-
+        const tradingCardShopContract = web3js.eth.contract(tradingCardShopAbi);
+        tradingCardShopInstance = tradingCardShopContract.at(tradingCardShopAddress);
 
         // localStorage.setItem('cardSetContract', '0x1387101cf6543df732d0b9a5aeab09be44fcbdb5');
 
@@ -396,7 +397,8 @@
         return promisify(tradingCards.getUniqueCardsCount);
     }
     function buyRandomCard() {
-        return promisify(tradingCards.buyRandomCard);
+        console.log(tradingCardsAddress);
+        return promisify(tradingCardShopInstance.buyRandomCard, tradingCardsAddress);
     }
     function mintCards(name, instanceCount) {
         $("#mintCardsModal").modal('toggle');

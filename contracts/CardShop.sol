@@ -19,7 +19,7 @@ contract CardShop {
         return rand % _max;
     }
     
-    function _buyCard(address _cardSetAddress, uint _cardId) internal {
+    function _buyCard(address _cardSetAddress, uint _cardId) private {
         CardSet cardSet = CardSet(_cardSetAddress);
         
         cardSet.transferFrom(this, msg.sender, _cardId);
@@ -32,8 +32,9 @@ contract CardShop {
         
         CardSet cardSet = CardSet(_cardSetAddress);
         
-        uint[] memory unownedCards = cardSet.getCardsUnowned();
+        uint[] memory unownedCards = cardSet.getCardsByOwner(this);
         if (unownedCards.length-1 == 0) {
+            
             _buyCard(_cardSetAddress, unownedCards[0]);
         } else {
             uint cardIdToBuy = unownedCards[_generateRandomNumber(unownedCards.length-1)];

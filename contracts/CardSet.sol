@@ -60,7 +60,7 @@ contract CardSet is Ownable, ERC721Enumerable {
     }
 
 
-    function getCardsByOwner(address _owner) external view returns(uint[]) {
+    function getCardsByOwner(address _owner) public view returns(uint[]) {
         uint[] memory result = new uint[](balanceOf(_owner));
         for (uint i = 0; i < balanceOf(_owner); i++) {
             result[i] = tokenOfOwnerByIndex(_owner, i);
