@@ -9,6 +9,8 @@
     <script language="javascript" type="text/javascript" src="js/web3.js-0.20.6/web3.min.js"></script>
 
     <script language="javascript" type="text/javascript" src="tradingcards.abi.js"></script>
+    <script language="javascript" type="text/javascript" src="tradingCardShop.abi.js"></script>
+
 </head>
 
 <body>
@@ -46,6 +48,7 @@
                 <ul class="list-unstyled text-small">
                     <li><a href="#" data-toggle="modal" data-target="#mintCardsModal">Mint Cards</a></li>
                     <li><a href="#" data-toggle="modal" data-target="#changeCardSetModal">Change CardSet</a></li>
+                    <li><a href="#" data-toggle="modal" data-target="#changeCardShopModal">Change CardShop</a></li>
                 </ul>
             </div>
         </div>
@@ -101,6 +104,28 @@
     </div>
 </div>
 
+<!-- Modal ChangeShop -->
+<div class="modal fade" id="changeCardShopModal" tabindex="-1" role="dialog" aria-labelledby="changeCardShopModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeCardShopModalLabel">Change CardShop</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    CardShop Address: <input type="text" id="cardShopAddress" class="col-lg-10"><br>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="submitCardShopAddressCancel">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitCardShopAddress">Set</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Transfer -->
 <div class="modal fade" id="transferModal" tabindex="-1" role="dialog" aria-labelledby="transferModalLabel" aria-hidden="true">
@@ -156,12 +181,15 @@
 
 <script>
     var tradingCards;
+    var tradingCardShopInstance;
     var userAccount;
     const defaultTradingCardsAddress = '0xa98b3ca48aa50364f7b30d68f8d5153409b5dc1e';
+
     if (localStorage.getItem('cardSetContract') === null) {
         localStorage.setItem('cardSetContract', defaultTradingCardsAddress);
     }
     let tradingCardsAddress = localStorage.getItem('cardSetContract');
+    let tradingCardShopAddress = localStorage.getItem('cardShopContract');
 
     const promisify = (func, ...args) =>
         new Promise((resolve, reject) =>
@@ -219,6 +247,21 @@
             displayCardSet(userAccount);
         });
 
+
+        $("#submitCardShopAddress").click(function() {
+            const cardShopAddress = $("#cardShopAddress").val();
+            localStorage.setItem('cardShopContract', cardShopAddress);
+            tradingCardShopAddress = cardShopAddress;
+
+            const tradingCardShopContract = web3js.eth.contract(tradingCardShopAbi);
+            tradingCardShopInstance = tradingCardsContract.at(tradingCardShopAddress);
+
+            $("#changeCardShopModal").modal('toggle');
+            displayCardSet(userAccount);
+        });
+
+
+
         $("#mintCardsBtn").click(function() {
             const name = $("#mint_name").val();
             const instanceCount = $("#mint_instanceCount").val();
@@ -261,7 +304,7 @@
                 console.log(result);
                 let event = result.args;
                 console.log(`CardBought with cardId${event.cardId}, owner:${event.owner}`);
-                displayUnownedCardsCount();
+                displayCardsForSaleCount();
                 displayCardsForOwner(userAccount);
             }
         });
@@ -271,7 +314,7 @@
                 console.log(result);
                 let event = result.args;
                 console.log(`CardsMinted with name:${event.name}, cardNum:${event.cardNum}, instanceCount:${event.instanceCount}`);
-                displayUnownedCardsCount();
+                displayCardsForSaleCount();
                 displayCardsForOwner(userAccount);
             }
         });
@@ -284,7 +327,7 @@
         });
 
         displayCardsForOwner(owner);
-        displayUnownedCardsCount();
+        displayCardsForSaleCount();
     }
 
     function displayCardsForOwner(owner) {
@@ -324,6 +367,16 @@
             $("#unownedCardsCount").append(`
                 <div>
                 Hurry! Only ${count} cards left.
+                </div>`);
+        });
+    }
+
+    function displayCardsForSaleCount() {
+        getCardsByOwner(tradingCardShopAddress).then(cards => {
+            $("#unownedCardsCount").empty();
+            $("#unownedCardsCount").append(`
+                <div>
+                Hurry! Only ${cards.length} cards left.
                 </div>`);
         });
     }

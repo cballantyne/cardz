@@ -9,11 +9,6 @@ contract CardSet is Ownable, ERC721Enumerable {
 
     event CardsMinted(string name, uint cardNum, uint instanceCount);
     event CardMinted(uint cardId, string name, uint cardNum, uint instanceNum);
-    event CardBought(uint cardId, address owner);
-
-    uint dnaDigits = 16;
-    uint dnaModulus = 10 ** dnaDigits;
-    uint cooldownTime = 1 days;
 
     struct Card {
         string name;
@@ -26,19 +21,11 @@ contract CardSet is Ownable, ERC721Enumerable {
 
     function _createCard(string _name, uint16 _cardNum, uint16 _instanceNum) internal {
         uint id = cards.push(Card(_name, _cardNum, _instanceNum)) - 1;
-        super._mint(this, id);
+        super._mint(msg.sender, id);
         CardMinted(id, _name, _cardNum, _instanceNum);
     }
 
-    function _generateRandomDna(string _str) private view returns (uint) {
-        uint rand = uint(keccak256(_str));
-        return rand % dnaModulus;
-    }
-
-    function _generateRandomNumber(uint _max) private view returns (uint) {
-        uint rand = uint(keccak256(now + uint(msg.sender)));
-        return rand % _max;
-    }
+  
 
     function getUnownedCardsCount() public view returns (uint) {
         uint count = 0;
@@ -60,7 +47,7 @@ contract CardSet is Ownable, ERC721Enumerable {
 
     function mintCards(string _name, uint16 _instanceCount) public onlyContractOwner {
         // require(ownerZombieCount[msg.sender] == 0);
-        uint randDna = _generateRandomDna(_name);
+        //uint randDna = _generateRandomDna(_name);
 
         // randDna = randDna - randDna % 100;
         // _createZombie(_name, randDna);
@@ -72,21 +59,6 @@ contract CardSet is Ownable, ERC721Enumerable {
         CardsMinted(_name, nextCardNum, _instanceCount);
     }
 
-    function buyCard(uint _cardId) public {
-        transferFrom(this, msg.sender, _cardId);
-
-        CardBought(_cardId, msg.sender);
-    }
-
-    function buyRandomCard() public {
-        uint[] memory unownedCards = getCardsUnowned();
-        if (unownedCards.length-1 == 0) {
-            buyCard(unownedCards[0]);
-        } else {
-            uint cardIdToBuy = unownedCards[_generateRandomNumber(unownedCards.length-1)];
-            buyCard(cardIdToBuy);
-        }
-    }
 
     function getCardsByOwner(address _owner) external view returns(uint[]) {
         uint[] memory result = new uint[](balanceOf(_owner));
