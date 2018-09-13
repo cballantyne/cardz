@@ -24,7 +24,7 @@ contract CardShop {
         
         cardSet.transferFrom(this, msg.sender, _cardId);
 
-        CardBought(_cardId, msg.sender);
+        emit CardBought(_cardId, msg.sender);
     }
 
     function buyRandomCard(address _cardSetAddress) external {

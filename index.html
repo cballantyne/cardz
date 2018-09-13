@@ -29,7 +29,7 @@
 
     <p class="lead"></p>
 
-    <p class="lead" id="unownedCardsCount">
+    <p class="lead" id="cardsForSaleCount">
 
     </p>
     <a href="#" id="buyRandomCard">Buy Random Card</a>
@@ -46,9 +46,13 @@
 
             <div class="col-6 col-md">
                 <ul class="list-unstyled text-small">
-                    <li><a href="#" data-toggle="modal" data-target="#mintCardsModal">Mint Cards</a></li>
                     <li><a href="#" data-toggle="modal" data-target="#changeCardSetModal">Change CardSet</a></li>
                     <li><a href="#" data-toggle="modal" data-target="#changeCardShopModal">Change CardShop</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md">
+                <ul class="list-unstyled text-small">
+                    <li><a href="#" data-toggle="modal" data-target="#mintCardsModal">Mint Cards</a></li>
                 </ul>
             </div>
         </div>
@@ -362,20 +366,10 @@
         });
     }
 
-    function displayUnownedCardsCount() {
-        getUnownedCardsCount().then(count => {
-            $("#unownedCardsCount").empty();
-            $("#unownedCardsCount").append(`
-                <div>
-                Hurry! Only ${count} cards left.
-                </div>`);
-        });
-    }
-
     function displayCardsForSaleCount() {
         getCardsByOwner(tradingCardShopAddress).then(cards => {
-            $("#unownedCardsCount").empty();
-            $("#unownedCardsCount").append(`
+            $("#cardsForSaleCount").empty();
+            $("#cardsForSaleCount").append(`
                 <div>
                 Hurry! Only ${cards.length} cards left.
                 </div>`);
@@ -389,9 +383,6 @@
 
     function getCardSetName() {
         return promisify(tradingCards.name);
-    }
-    function getUnownedCardsCount() {
-        return promisify(tradingCards.getUnownedCardsCount);
     }
     function getUniqueCardsCount() {
         return promisify(tradingCards.getUniqueCardsCount);
