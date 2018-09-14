@@ -6,7 +6,7 @@
 
     <meta charset="UTF-8">
     <title>Luna Cards</title>
-    <script language="javascript" type="text/javascript" src="js/web3.js-0.20.6/web3.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/web3.js-1.0.0-beta.36/web3.min.js"></script>
 
     <script language="javascript" type="text/javascript" src="tradingcards.abi.js"></script>
     <script language="javascript" type="text/javascript" src="tradingCardShop.abi.js"></script>
@@ -195,21 +195,24 @@
     let tradingCardsAddress = localStorage.getItem('cardSetContract');
     let tradingCardShopAddress = localStorage.getItem('cardShopContract');
 
-    const promisify = (func, ...args) =>
-        new Promise((resolve, reject) =>
-            func(...args, (err, value) =>
-                (err ? reject(err) : resolve(value))
-            )
-        );
+    console.log(tradingCardShopAddress);
 
     function startApp() {
         console.log("starting app...");
         console.log(tradingcardsAbi);
 
-        const tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
-        tradingCards = tradingCardsContract.at(tradingCardsAddress);
-        const tradingCardShopContract = web3js.eth.contract(tradingCardShopAbi);
-        tradingCardShopInstance = tradingCardShopContract.at(tradingCardShopAddress);
+        //const tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
+        //tradingCards = tradingCardsContract.at(tradingCardsAddress);
+
+
+        tradingCards = new web3js.eth.Contract(tradingcardsAbi, tradingCardsAddress);
+
+
+        //const tradingCardShopContract = web3js.eth.contract(tradingCardShopAbi);
+        //tradingCardShopInstance = tradingCardShopContract.at(tradingCardShopAddress);
+
+        tradingCardShopInstance = new web3js.eth.Contract(tradingCardShopAbi, tradingCardShopAddress);
+
 
         // localStorage.setItem('cardSetContract', '0x1387101cf6543df732d0b9a5aeab09be44fcbdb5');
 
@@ -225,13 +228,18 @@
         // });
         var accountInterval = setInterval(function() {
             // Check if account has changed
-            if (web3.eth.accounts[0] !== userAccount) {
-                userAccount = web3.eth.accounts[0];
-                // Call a function to update the UI with the new account
-                console.log("have account now do stuff");
+            web3js.eth.getAccounts().then(function(accounts) {
 
-                displayCardSet(userAccount);
-            }
+                if (accounts[0] !== userAccount) {
+
+                    console.log('got accounts!!!');
+                    console.log(accounts[0]);
+                    userAccount = accounts[0];
+                    displayCardSet(userAccount);
+                }
+            });
+
+
         }, 3000);
 
 
@@ -321,6 +329,8 @@
                 console.log(`CardsMinted with name:${event.name}, cardNum:${event.cardNum}, instanceCount:${event.instanceCount}`);
                 displayCardsForSaleCount();
                 displayCardsForOwner(userAccount);
+            } else {
+                console.log('error on mint.');
             }
         });
 
@@ -378,22 +388,25 @@
 
 
     function getCardsByOwner(owner) {
-        return promisify(tradingCards.getCardsByOwner, owner)
+        return tradingCards.methods.getCardsByOwner(owner).call()
     }
 
     function getCardSetName() {
-        return promisify(tradingCards.name);
+        console.log('get name....');
+        const result = tradingCards.methods.name().call();
+        console.log('after');
+        return result;
     }
     function getUniqueCardsCount() {
-        return promisify(tradingCards.getUniqueCardsCount);
+        return tradingCards.methods.getUniqueCardsCount().call();
     }
     function buyRandomCard() {
         console.log(tradingCardsAddress);
-        return promisify(tradingCardShopInstance.buyRandomCard, tradingCardsAddress);
+        return tradingCardShopInstance.methods.buyRandomCard(tradingCardsAddress).send({from: userAccount});
     }
     function mintCards(name, instanceCount) {
         $("#mintCardsModal").modal('toggle');
-        return promisify(tradingCards.mintCards, name, instanceCount);
+        return tradingCards.methods.mintCards(name, instanceCount).send({from: userAccount});
     }
 
     function transferCard(cardId, to) {
@@ -402,20 +415,20 @@
         console.log(`from:${userAccount}`);
         console.log(`to:${to}`);
         console.log(`cardId:${cardId}`);
-        return promisify(tradingCards.transferFrom, userAccount, to, cardId);
+        return tradingCards.methods.transferFrom(userAccount, to, cardId).send({from: userAccount});
     }
     function getCardDetails(id) {
-        return promisify(tradingCards.cards, id);
+        return tradingCards.methods.cards(id).call();
     }
 
     function displayCards(ids) {
         $("#cards").empty();
         for (id of ids) {
-            const currentId = id.toNumber();
+            const currentId = id;
             // Look up card details from our contract. Returns a `Card` object
             getCardDetails(currentId)
                 .then(card => {
-                    console.log(card);
+                    //console.log(card);
                     // Using ES6's "template literals" to inject variables into the HTML.
                     // Append each one to our #card div
                     $("#cards").append(`
