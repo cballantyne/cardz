@@ -32,6 +32,9 @@
     <p class="lead" id="cardsForSaleCount">
 
     </p>
+
+    <p class="lead" id="userCardsCount"></p>
+
     <a href="#" id="buyRandomCard">Buy Random Card</a>
 </div>
 
@@ -187,6 +190,8 @@
     var tradingCards;
     var tradingCardShopInstance;
     var userAccount;
+    let tradingCardShopCardsCount;
+    let userAccountCardsCount;
     const defaultTradingCardsAddress = '0xa98b3ca48aa50364f7b30d68f8d5153409b5dc1e';
 
     if (localStorage.getItem('cardSetContract') === null) {
@@ -199,34 +204,10 @@
 
     function startApp() {
         console.log("starting app...");
-        console.log(tradingcardsAbi);
-
-        //const tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
-        //tradingCards = tradingCardsContract.at(tradingCardsAddress);
-
-
         tradingCards = new web3js.eth.Contract(tradingcardsAbi, tradingCardsAddress);
-
-
-        //const tradingCardShopContract = web3js.eth.contract(tradingCardShopAbi);
-        //tradingCardShopInstance = tradingCardShopContract.at(tradingCardShopAddress);
-
         tradingCardShopInstance = new web3js.eth.Contract(tradingCardShopAbi, tradingCardShopAddress);
 
-
-        // localStorage.setItem('cardSetContract', '0x1387101cf6543df732d0b9a5aeab09be44fcbdb5');
-
-        console.log(tradingCards);
-
-        // var result = tradingCards.cards(1);
-        // console.log(result); // '0x25434534534'
-        // tradingCards.cards(3, function(error, result){
-        //     if(!error)
-        //         console.log(JSON.stringify(result));
-        //     else
-        //         console.error(error);
-        // });
-        var accountInterval = setInterval(function() {
+        const accountInterval = setInterval(function() {
             // Check if account has changed
             web3js.eth.getAccounts().then(function(accounts) {
 
@@ -236,6 +217,22 @@
                     console.log(accounts[0]);
                     userAccount = accounts[0];
                     displayCardSet(userAccount);
+                } else {
+                    getCardsByOwner(tradingCardShopAddress).then(cards => {
+                        if (tradingCardShopCardsCount !== cards.length) {
+                            console.log('shop balance changed so refreshing ui.');
+                            displayCardSet(userAccount);
+                        }
+                    });
+                    getCardsByOwner(userAccount).then(cards => {
+                        if (userAccountCardsCount !== cards.length) {
+                            console.log('user balance changed so refreshing ui.');
+                            displayCardSet(userAccount);
+                        }
+                    });
+
+
+
                 }
             });
 
@@ -312,7 +309,7 @@
 
 
         // event filters
-        tradingCards.CardBought({}, function (error, result) {
+        tradingCardShopInstance.events.CardBought({}, function (error, result) {
             if (!error) {
                 console.log(result);
                 let event = result.args;
@@ -322,7 +319,7 @@
             }
         });
 
-        tradingCards.CardsMinted({}, function (error, result) {
+        tradingCards.events.CardsMinted({}, function (error, result) {
             if (!error) {
                 console.log(result);
                 let event = result.args;
@@ -330,7 +327,9 @@
                 displayCardsForSaleCount();
                 displayCardsForOwner(userAccount);
             } else {
+
                 console.log('error on mint.');
+                console.log(error)
             }
         });
 
@@ -348,6 +347,8 @@
     function displayCardsForOwner(owner) {
         getCardsByOwner(owner)
             .then(result => {
+                userAccountCardsCount = result.length;
+                displayUserCardsCount(userAccountCardsCount);
                 displayCards(result);
                 return getUniqueCardsCount();
             })
@@ -378,12 +379,20 @@
 
     function displayCardsForSaleCount() {
         getCardsByOwner(tradingCardShopAddress).then(cards => {
+            tradingCardShopCardsCount = cards.length;
             $("#cardsForSaleCount").empty();
             $("#cardsForSaleCount").append(`
                 <div>
                 Hurry! Only ${cards.length} cards left.
                 </div>`);
         });
+    }
+    function displayUserCardsCount(count) {
+        $("#userCardsCount").empty();
+        $("#userCardsCount").append(`
+            You own ${count} cards.
+            `);
+
     }
 
 
