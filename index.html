@@ -187,16 +187,22 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
 
 <script>
+    // CardShop Ropsten - 0x980b064ef60e93a8f714caa25de182d9c43d4869
+    // CardSet Ropsten - 0xf9faa12be3787e4336f8d3018141f6b89a59b38d
     var tradingCards;
     var tradingCardShopInstance;
     var userAccount;
     let tradingCardShopCardsCount;
     let userAccountCardsCount;
-    const defaultTradingCardsAddress = '0xa98b3ca48aa50364f7b30d68f8d5153409b5dc1e';
+    const defaultTradingCardsAddress = '0xf9faa12be3787e4336f8d3018141f6b89a59b38d';
 
     if (localStorage.getItem('cardSetContract') === null) {
         localStorage.setItem('cardSetContract', defaultTradingCardsAddress);
     }
+    if (localStorage.getItem('cardShopContract') === null) {
+        localStorage.setItem('cardShopContract', '0x980b064ef60e93a8f714caa25de182d9c43d4869');
+    }
+
     let tradingCardsAddress = localStorage.getItem('cardSetContract');
     let tradingCardShopAddress = localStorage.getItem('cardShopContract');
 
