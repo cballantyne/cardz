@@ -206,7 +206,8 @@
     let tradingCardsAddress = localStorage.getItem('cardSetContract');
     let tradingCardShopAddress = localStorage.getItem('cardShopContract');
 
-    console.log(tradingCardShopAddress);
+    console.log(`cardSetAddress:${tradingCardsAddress}`);
+    console.log(`cardShopAddress:${tradingCardShopAddress}`);
 
     function startApp() {
         console.log("starting app...");
@@ -255,9 +256,11 @@
             const cardSetAddress = $("#cardSetAddress").val();
             localStorage.setItem('cardSetContract', cardSetAddress);
             tradingCardsAddress = cardSetAddress;
+            //
+            // const tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
+            // tradingCards = tradingCardsContract.at(tradingCardsAddress);
 
-            const tradingCardsContract = web3js.eth.contract(tradingcardsAbi);
-            tradingCards = tradingCardsContract.at(tradingCardsAddress);
+            tradingCards = new web3js.eth.Contract(tradingcardsAbi, tradingCardsAddress);
 
             $("#changeCardSetModal").modal('toggle');
             displayCardSet(userAccount);
@@ -315,35 +318,38 @@
 
 
         // event filters
-        tradingCardShopInstance.events.CardBought({}, function (error, result) {
-            if (!error) {
-                console.log(result);
-                let event = result.args;
-                console.log(`CardBought with cardId${event.cardId}, owner:${event.owner}`);
-                displayCardsForSaleCount();
-                displayCardsForOwner(userAccount);
-            }
-        });
-
-        tradingCards.events.CardsMinted({}, function (error, result) {
-            if (!error) {
-                console.log(result);
-                let event = result.args;
-                console.log(`CardsMinted with name:${event.name}, cardNum:${event.cardNum}, instanceCount:${event.instanceCount}`);
-                displayCardsForSaleCount();
-                displayCardsForOwner(userAccount);
-            } else {
-
-                console.log('error on mint.');
-                console.log(error)
-            }
-        });
+        // tradingCardShopInstance.events.CardBought({}, function (error, result) {
+        //     if (!error) {
+        //         console.log(result);
+        //         let event = result.args;
+        //         console.log(`CardBought with cardId${event.cardId}, owner:${event.owner}`);
+        //         displayCardsForSaleCount();
+        //         displayCardsForOwner(userAccount);
+        //     }
+        // });
+        //
+        // tradingCards.events.CardsMinted({}, function (error, result) {
+        //     if (!error) {
+        //         console.log(result);
+        //         let event = result.args;
+        //         console.log(`CardsMinted with name:${event.name}, cardNum:${event.cardNum}, instanceCount:${event.instanceCount}`);
+        //         displayCardsForSaleCount();
+        //         displayCardsForOwner(userAccount);
+        //     } else {
+        //
+        //         console.log('error on mint.');
+        //         console.log(error)
+        //     }
+        // });
 
     }
 
     function displayCardSet(owner) {
         getCardSetName().then(name => {
             $("#cardSetDescription").html('CardSet ' + name + ' at ' + tradingCardsAddress);
+        }).catch((err) => {
+            console.log('error occurred getting cardset name.');
+            console.log(err);
         });
 
         displayCardsForOwner(owner);
@@ -407,10 +413,7 @@
     }
 
     function getCardSetName() {
-        console.log('get name....');
-        const result = tradingCards.methods.name().call();
-        console.log('after');
-        return result;
+        return tradingCards.methods.getUniqueCardsCount().call({from: userAccount});
     }
     function getUniqueCardsCount() {
         return tradingCards.methods.getUniqueCardsCount().call();
@@ -486,6 +489,7 @@
             // Use Mist/MetaMask's provider
             web3js = new Web3(web3.currentProvider);
         } else {
+            console.log('metamask not found.');
             // Handle the case where the user doesn't have Metamask installed
             // Probably show them a message prompting them to install Metamask
         }
