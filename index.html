@@ -229,14 +229,16 @@
                         if (tradingCardShopCardsCount !== balance) {
                             console.log('shop balance changed so refreshing ui.');
                             displayCardSet(userAccount);
+                        } else {
+                            getBalanceOf(userAccount).then(balance => {
+                                if (userAccountCardsCount !== balance) {
+                                    console.log('user balance changed so refreshing ui.');
+                                    displayCardSet(userAccount);
+                                }
+                            });
                         }
                     });
-                    getBalanceOf(userAccount).then(balance => {
-                        if (userAccountCardsCount !== balance) {
-                            console.log('user balance changed so refreshing ui.');
-                            displayCardSet(userAccount);
-                        }
-                    });
+
 
 
 
