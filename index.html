@@ -225,14 +225,14 @@
                     userAccount = accounts[0];
                     displayCardSet(userAccount);
                 } else {
-                    getCardsByOwner(tradingCardShopAddress).then(cards => {
-                        if (tradingCardShopCardsCount !== cards.length) {
+                    getBalanceOf(tradingCardShopAddress).then(balance => {
+                        if (tradingCardShopCardsCount !== balance) {
                             console.log('shop balance changed so refreshing ui.');
                             displayCardSet(userAccount);
                         }
                     });
-                    getCardsByOwner(userAccount).then(cards => {
-                        if (userAccountCardsCount !== cards.length) {
+                    getBalanceOf(userAccount).then(balance => {
+                        if (userAccountCardsCount !== balance) {
                             console.log('user balance changed so refreshing ui.');
                             displayCardSet(userAccount);
                         }
@@ -357,10 +357,14 @@
     }
 
     function displayCardsForOwner(owner) {
+
+        getBalanceOf(owner).then((balance) => {
+            userAccountCardsCount = balance;
+            displayUserCardsCount(userAccountCardsCount);
+        });
         getCardsByOwner(owner)
             .then(result => {
-                userAccountCardsCount = result.length;
-                displayUserCardsCount(userAccountCardsCount);
+
                 displayCards(result);
                 return getUniqueCardsCount();
             })
@@ -390,12 +394,12 @@
     }
 
     function displayCardsForSaleCount() {
-        getCardsByOwner(tradingCardShopAddress).then(cards => {
-            tradingCardShopCardsCount = cards.length;
+        getBalanceOf(tradingCardShopAddress).then(balance => {
+            tradingCardShopCardsCount = balance;
             $("#cardsForSaleCount").empty();
             $("#cardsForSaleCount").append(`
                 <div>
-                Hurry! Only ${cards.length} cards left.
+                Hurry! Only ${balance} cards left.
                 </div>`);
         });
     }
@@ -411,9 +415,12 @@
     function getCardsByOwner(owner) {
         return tradingCards.methods.getCardsByOwner(owner).call()
     }
+    function getBalanceOf(owner) {
+        return tradingCards.methods.balanceOf(owner).call()
+    }
 
     function getCardSetName() {
-        return tradingCards.methods.getUniqueCardsCount().call({from: userAccount});
+        return tradingCards.methods.name().call();
     }
     function getUniqueCardsCount() {
         return tradingCards.methods.getUniqueCardsCount().call();
